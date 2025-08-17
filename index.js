@@ -56,7 +56,7 @@ const UserPing = async () => {
     const data = JSON.parse(readFileSync(new URL("./users.json", import.meta.url), "utf-8"));
     if(!data.users)
       return;
-    UsersID=data.users;
+    const UsersID=data.users;
     let shuffledUsers = UsersID.sort(() => Math.random() - 0.5);
     let randomId = shuffledUsers[0];
 
