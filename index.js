@@ -4,6 +4,7 @@ import { configDotenv } from 'dotenv';
 import fs,{readFileSync } from "fs";
 import { messageCreate } from './function/messageCreate.js';
 import { sendMessageChannel } from './util/sendMessage.js';
+import moment from 'moment-timezone';
 
 configDotenv();
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
@@ -76,6 +77,8 @@ client.once('ready', async () => {
   console.log(`Logged in as ${client.user.tag}!`);
   channel = await client.channels.fetch(MyChannelId);
   cron.schedule('55 23 * * *', async () => {
+    const now = moment().tz('Asia/Kathmandu').format('YYYY-MM-DD HH:mm:ss');
+    console.log(`Cron triggered! Current Kathmandu time: ${now}`);
     await SecretMode(); 
   },{
     timezone: "Asia/Kathmandu"
