@@ -1,14 +1,15 @@
 import { Client, GatewayIntentBits } from 'discord.js';
-import { scheduleJob } from 'node-schedule';
+import cron from "node-cron";
 import { configDotenv } from 'dotenv';
-import fetch from 'node-fetch';
 import fs,{readFileSync } from "fs";
-configDotenv();
+import { messageCreate } from './function/messageCreate.js';
+import { sendMessageChannel } from './util/sendMessage.js';
 
+configDotenv();
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
 
 const MyChannelId = process.env.CHANNEL_ID;
-const special_user=process.env.SPECIAL_USER;
+const special_user = process.env.SPECIAL_USER;
 let channel;
 const SecretName = "Ghost";
 const SecretImageUrl = "./assets/discord/ghost.jpg";
@@ -19,10 +20,6 @@ const oldImageUrl = "./assets/discord/discord-logo.png";
 const oldAvatar = fs.readFileSync(oldImageUrl);
 
 let isInSecretMode = false;
-
-const sendMessageChannel=async(channel,message)=>{
-  await channel.send(message);
-}
 
 const SecretMode = async () => {
   if (!isInSecretMode) {
@@ -78,56 +75,16 @@ const UserPing = async () => {
 client.once('ready', async () => {
   console.log(`Logged in as ${client.user.tag}!`);
   channel = await client.channels.fetch(MyChannelId);
-  scheduleJob("57 24 * * *", async () => {
+  cron.schedule('55 23 * * *', async () => {
     await SecretMode(); 
+  },{
+    timezone: "Asia/Kathmandu"
   });
-  scheduleJob("15 14 * * *", UserPing);
+  cron.schedule("0 0 * * *", UserPing,{
+    timezone: "Asia/Kathmandu"
+  });
 });
 
-// Normal functions
-const sadWords = ["sad", "depressed", "unhappy", "angry"];
-const encouragements = [
-  "Cheer up!",
-  "Hang in there",
-  "You are a great person/bot",
-];
-
-function getQuote() {
-  return fetch("https://zenquotes.io/api/random")
-    .then(res => res.json())
-    .then(data => data[0]["q"] + " -" + data[0]["a"]);
-}
-
-client.on("messageCreate", message => {
-  if (message.author.bot) return;
-  if (message.content.toLowerCase().startsWith("hi")) {
-    message.reply({ content: "Hi 😊😊" });
-  } else if (message.content.toLowerCase().startsWith("hello")) {
-    message.reply({ content: "Hello 😊😊" });
-  } else if (message.content.toLowerCase().startsWith("binod is")) {
-    message.reply({ content: "Noob" });
-  } else if(message.content.toLowerCase().startsWith("binod")){
-    if(channel){
-      sendMessageChannel(channel,"noob");
-    }else{
-      console.log("Error in channel send message channel");
-    }
-  } else if (message.content.toLowerCase().startsWith("who is noob")){
-    if(channel){
-      if(special_user){
-      sendMessageChannel(channel,`<@${special_user}> is noob`);
-      }else{
-      sendMessageChannel(channel,"IDK")
-      }
-    }else{
-      console.log("Error in channel send message channel");
-    }
-  } else if (message.content === "$inspire") {
-    getQuote().then(quote => message.reply(quote));
-  } else if (sadWords.some(word => message.content.includes(word))) {
-    const encouragement = encouragements[Math.floor(Math.random() * encouragements.length)];
-    message.reply(encouragement);
-  }
-});
+client.on("messageCreate", message=>messageCreate(message,channel,special_user));
 
 client.login(process.env.BOT_TOKEN);
