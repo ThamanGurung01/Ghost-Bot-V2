@@ -1,4 +1,4 @@
-import { Client, GatewayIntentBits } from 'discord.js';
+import { Client, GatewayIntentBits, ActivityType } from 'discord.js';
 import cron from "node-cron";
 import { configDotenv } from 'dotenv';
 import fs,{readFileSync } from "fs";
@@ -9,7 +9,7 @@ import moment from 'moment-timezone';
 configDotenv();
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
 
-const MyChannelId = process.env.CHANNEL_ID;
+const MyChannelId = process.env.CHANNEL_ID || process.env.TEST_CHANNEL_ID;
 const special_user = process.env.SPECIAL_USER;
 let channel;
 const SecretName = "Ghost";
@@ -75,6 +75,10 @@ const UserPing = async () => {
 
 client.once('ready', async () => {
   console.log(`Logged in as ${client.user.tag}!`);
+  client.user.setPresence({
+    status: 'online',
+    activities: [{ name: '!t.help', type: ActivityType.Listening }]
+  });
   channel = await client.channels.fetch(MyChannelId);
   cron.schedule('55 23 * * *', async () => {
     const now = moment().tz('Asia/Kathmandu').format('YYYY-MM-DD HH:mm:ss');
@@ -89,5 +93,4 @@ client.once('ready', async () => {
 });
 
 client.on("messageCreate", message=>messageCreate(message,channel,special_user));
-
-client.login(process.env.BOT_TOKEN);
+client.login(process.env.BOT_TOKEN || process.env.TEST_BOT_TOKEN);

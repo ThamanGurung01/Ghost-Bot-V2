@@ -1,0 +1,11 @@
+services:
+  server:
+    image: ghcr.io/thamangurung01/dc_bot:latest
+    container_name: dc_bot
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+    env_file:
+      - .env
+    ports:
+      - 4500:4500

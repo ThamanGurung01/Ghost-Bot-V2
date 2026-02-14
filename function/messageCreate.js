@@ -1,5 +1,6 @@
 import {getQuote} from "../util/quote.js";
 import { sendMessageChannel } from '../util/sendMessage.js';
+import Command from "./Command.js";
 export const messageCreate= (message,channel,special_user)=> {
 const sadWords = ["sad", "depressed", "unhappy", "angry"];
 const encouragements = [
@@ -8,7 +9,11 @@ const encouragements = [
   "You are a great person/bot",
 ];
   if (message.author.bot) return;
-  if (message.content.toLowerCase().startsWith("hi")) {
+  const prefix="!";
+  if(message.content.startsWith(prefix)){
+    Command(message);
+  }else{
+      if (message.content.toLowerCase().startsWith("hi")) {
     message.reply({ content: "Hi 😊😊" });
   } else if (message.content.toLowerCase().startsWith("hello")) {
     message.reply({ content: "Hello 😊😊" });
@@ -36,4 +41,6 @@ const encouragements = [
     const encouragement = encouragements[Math.floor(Math.random() * encouragements.length)];
     message.reply(encouragement);
   }
+  }
+
 }
